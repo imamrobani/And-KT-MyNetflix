@@ -46,12 +46,12 @@ fun MovieDetailScreen(
                 .padding(it)
                 .background(Color.Black)
         ) {
-            val (backdroRef, topBarRef, ratingRef, buttonRef, overviewRef) = createRefs()
+            val (backdropRef, topBarRef, ratingRef, buttonRef, overviewRef) = createRefs()
 
             Image(
                 modifier = Modifier
                     .fillMaxSize()
-                    .constrainAs(backdroRef) {
+                    .constrainAs(backdropRef) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
