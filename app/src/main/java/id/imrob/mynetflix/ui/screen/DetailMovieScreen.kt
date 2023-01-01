@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import id.imrob.mynetflix.data.MovieDatasource
 import id.imrob.mynetflix.domain.model.Movie
 import id.imrob.mynetflix.ui.component.MovieAppBar
@@ -48,7 +51,7 @@ fun MovieDetailScreen(
         ) {
             val (backdropRef, topBarRef, ratingRef, buttonRef, overviewRef) = createRefs()
 
-            Image(
+            AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
                     .constrainAs(backdropRef) {
@@ -61,7 +64,10 @@ fun MovieDetailScreen(
                     .drawWithCache {
                         createVerticalGradient(0, 5f)
                     },
-                painter = painterResource(id = movie.backdropResourceId),
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(movie.backdropResourceId)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = "",
                 contentScale = ContentScale.Crop
             )
@@ -139,7 +145,7 @@ private fun ContentOverview(modifier: Modifier = Modifier, movie: Movie) {
             },
             text = "Overview", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
         )
-        Image(
+        AsyncImage(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .constrainAs(imageRef) {
@@ -148,7 +154,11 @@ private fun ContentOverview(modifier: Modifier = Modifier, movie: Movie) {
                     width = Dimension.ratio("2:3")
                     height = Dimension.value(150.dp)
                 },
-            painter = painterResource(id = movie.posterResourceId),
+//            painter = painterResource(id = movie.posterResourceId),
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(movie.posterResourceId)
+                .crossfade(true)
+                .build(),
             contentDescription = ""
         )
 

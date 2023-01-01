@@ -43,13 +43,12 @@ class MainActivity : ComponentActivity() {
 fun NetflixCloneApp(
     viewModel: MovieViewModel = viewModel(factory = MovieViewModel.Factory)
 ) {
-    val movies by viewModel.movies.observeAsState(arrayListOf())
+    val movies by viewModel.movies.collectAsState(arrayListOf())
     var isGrid by remember { mutableStateOf(false) }
     var keyword by remember { mutableStateOf("") }
 
-    LaunchedEffect(keyword){
-        viewModel.getMovies(keyword)
-    }
+    LaunchedEffect(""){ viewModel.getMovies() }
+    LaunchedEffect(keyword){ viewModel.searchMovie(keyword) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
