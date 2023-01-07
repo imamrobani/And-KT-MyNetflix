@@ -55,6 +55,7 @@ data class MovieResponse(
 )
 
 fun MovieResponse.toMovie() = Movie(
+	(this.id ?: -1).toString(),
 	this.originalTitle?:"",
 	this.overview?:"",
 	this.voteAverage?.toFloat()?:0f,

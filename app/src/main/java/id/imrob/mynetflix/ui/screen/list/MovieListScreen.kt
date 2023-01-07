@@ -1,4 +1,4 @@
-package id.imrob.mynetflix.ui.screen
+package id.imrob.mynetflix.ui.screen.list
 
 
 import androidx.compose.foundation.layout.Arrangement
@@ -15,14 +15,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import id.imrob.mynetflix.data.MovieDatasource
 import id.imrob.mynetflix.domain.model.Movie
+import id.imrob.mynetflix.ui.Routers
 import id.imrob.mynetflix.ui.component.MovieAppBar
 import id.imrob.mynetflix.ui.component.MovieItem
 
 @ExperimentalMaterial3Api
 @Composable
-fun MovieListScreen(paddingValues: PaddingValues, movies: List<Movie>) {
+fun MovieListScreen(paddingValues: PaddingValues, movies: List<Movie>, navHostController: NavHostController) {
     LazyColumn(
         modifier = Modifier.padding(paddingValues),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -32,7 +34,10 @@ fun MovieListScreen(paddingValues: PaddingValues, movies: List<Movie>) {
             MovieItem(
                 isGrid = false,
                 movie = movie,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onItemClick = { movie ->
+                    navHostController.navigate("${Routers.DETAIL}/${movie.id}")
+                }
             )
         }
     }

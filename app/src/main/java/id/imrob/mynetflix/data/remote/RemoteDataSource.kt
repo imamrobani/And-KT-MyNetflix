@@ -3,6 +3,7 @@ package id.imrob.mynetflix.data.remote
 import android.util.Log
 import id.imrob.mynetflix.data.remote.network.MovieService
 import id.imrob.mynetflix.data.remote.response.toListMovie
+import id.imrob.mynetflix.data.remote.response.toMovie
 import id.imrob.mynetflix.domain.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -16,5 +17,11 @@ class RemoteDataSource(
         movieService.getNowPlaying().toListMovie().let { emit(it) }
     }.catch {
         Log.d("RemoteDataSource", "getNowPlayingMovie: failed = ${it.message}")
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getMovieDetail(id: String) = flow {
+        movieService.getMovieDetail(id).toMovie().let { emit(it) }
+    }.catch {
+        Log.d("MovieRepository", "getMovieDetail: failed = ${it.message}")
     }.flowOn(Dispatchers.IO)
 }

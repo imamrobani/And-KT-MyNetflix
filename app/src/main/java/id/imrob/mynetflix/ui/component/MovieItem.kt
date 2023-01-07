@@ -1,7 +1,5 @@
 package id.imrob.mynetflix.ui.component
 
-import android.content.Intent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +14,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import id.imrob.mynetflix.DetailActivity
 import id.imrob.mynetflix.R
 import id.imrob.mynetflix.data.MovieDatasource
 import id.imrob.mynetflix.domain.model.Movie
@@ -32,21 +28,17 @@ import id.imrob.mynetflix.ui.theme.MyNetflixTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieItem(
+    modifier: Modifier = Modifier,
     isGrid: Boolean,
     movie: Movie,
-    modifier: Modifier = Modifier
+    onItemClick: (Movie) -> Unit
 ) {
-    val context = LocalContext.current
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         onClick = {
-            context.startActivity(
-                Intent(context, DetailActivity::class.java).apply {
-                    putExtra(DetailActivity.EXTRA_MOVIE, movie)
-                }
-            )
+            onItemClick.invoke(movie)
         }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -90,6 +82,6 @@ fun MovieItem(
 @Composable
 fun MovieItemPreview() {
     MyNetflixTheme {
-        MovieItem(isGrid = false, movie = MovieDatasource.getNowPlayingMovie()[0])
+        MovieItem(isGrid = false, movie = MovieDatasource.getNowPlayingMovie()[0], onItemClick =  {})
     }
 }

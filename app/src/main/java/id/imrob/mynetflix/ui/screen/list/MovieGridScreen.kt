@@ -1,4 +1,4 @@
-package id.imrob.mynetflix.ui.screen
+package id.imrob.mynetflix.ui.screen.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,8 +16,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import id.imrob.mynetflix.data.MovieDatasource
 import id.imrob.mynetflix.domain.model.Movie
+import id.imrob.mynetflix.ui.Routers
 import id.imrob.mynetflix.ui.component.MovieAppBar
 import id.imrob.mynetflix.ui.component.MovieItem
 
@@ -25,7 +28,8 @@ import id.imrob.mynetflix.ui.component.MovieItem
 @Composable
 fun MovieGridScreen(
     paddingValues: PaddingValues,
-    movies: List<Movie>
+    movies: List<Movie>,
+    navHostController: NavHostController
 ) {
     LazyVerticalGrid(
         modifier = Modifier.padding(paddingValues),
@@ -38,6 +42,9 @@ fun MovieGridScreen(
                 isGrid = true,
                 movie = movie,
                 modifier = Modifier.padding(horizontal = 16.dp),
+                onItemClick = { movie ->
+                    navHostController.navigate("${Routers.DETAIL}/${movie.id}")
+                }
             )
         }
     }
@@ -47,7 +54,7 @@ fun MovieGridScreen(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewMovieGridScreen() {
-    MovieGridScreen(paddingValues = PaddingValues(), MovieDatasource.getNowPlayingMovie())
+    MovieGridScreen(paddingValues = PaddingValues(), MovieDatasource.getNowPlayingMovie(), rememberNavController())
 }
 
 

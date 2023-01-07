@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    kotlin("kapt")
 }
 
 val compose_version = rootProject.extra["compose_version"] as String
@@ -78,8 +79,19 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$compose_version")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
 
+    // compose navigation
+    implementation("androidx.navigation:navigation-compose:2.5.3")
+
     // retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.6")
+
+    // room
+    implementation("androidx.room:room-runtime:2.4.3")
+    kapt("androidx.room:room-compiler:2.4.3")
+    implementation("androidx.room:room-ktx:2.4.3")
+
+    // datastore preferences
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }
