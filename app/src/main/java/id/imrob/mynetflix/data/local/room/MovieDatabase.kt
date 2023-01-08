@@ -9,7 +9,8 @@ import id.imrob.mynetflix.data.local.room.entity.UserEntity
 
 @Database(
     entities = [UserEntity::class],
-    version = 1
+    version = 1,
+    exportSchema = true,
 )
 abstract class MovieDatabase : RoomDatabase() {
 
