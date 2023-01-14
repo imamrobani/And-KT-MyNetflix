@@ -23,8 +23,8 @@ class MainViewModel constructor(
     val Factory: ViewModelProvider.Factory = viewModelFactory {
       initializer {
         val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MovieApplication
-        val respository = application.appMovieContainer.authRepository
-        MainViewModel(respository)
+        val repository = application.appMovieContainer.authRepository
+        MainViewModel(repository)
       }
     }
   }

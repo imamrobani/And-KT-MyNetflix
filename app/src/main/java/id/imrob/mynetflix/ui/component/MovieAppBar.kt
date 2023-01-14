@@ -35,7 +35,7 @@ fun MovieAppBar(
     CenterAlignedTopAppBar(
         modifier = modifier,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = if (isTransparent == true) Color.Transparent else MaterialTheme.colorScheme.surface
+            containerColor = if (isTransparent == true) Color.Transparent else Color.Black
         ),
         title = {
             Image(

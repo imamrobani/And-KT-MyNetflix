@@ -3,12 +3,13 @@ package id.imrob.mynetflix
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.navigation.NavBackStackEntry
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,8 +25,14 @@ import id.imrob.mynetflix.ui.theme.MyNetflixTheme
 
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModel.Factory
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             MyNetflixTheme {
                 NetflixCloneApp()
