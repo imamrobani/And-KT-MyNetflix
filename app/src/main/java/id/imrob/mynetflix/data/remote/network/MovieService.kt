@@ -1,8 +1,11 @@
 package id.imrob.mynetflix.data.remote.network
 
-import id.imrob.mynetflix.data.remote.response.ListMovieResponse
-import id.imrob.mynetflix.data.remote.response.MovieResponse
+import id.imrob.mynetflix.data.remote.request.LoginRequest
+import id.imrob.mynetflix.data.remote.request.RegisterRequest
+import id.imrob.mynetflix.data.remote.response.*
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -23,5 +26,15 @@ interface MovieService {
         @Path("movieId") movieId: String,
         @Query("api_key") apiKey: String = "0a597bad68c0b95d5fab612cff9d8891"
     ): MovieResponse
+
+    @POST("v1/user/register")
+    suspend fun register(
+        @Body register: RegisterRequest
+    ): WebResponse<RegisterReponse>
+
+    @POST("v1/user/login")
+    suspend fun login(
+        @Body login: LoginRequest
+    ): WebResponse<LoginReponse>
 
 }

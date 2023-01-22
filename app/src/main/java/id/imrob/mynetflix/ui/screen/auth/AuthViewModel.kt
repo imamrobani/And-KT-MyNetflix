@@ -7,53 +7,85 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.imrob.mynetflix.MovieApplication
 import id.imrob.mynetflix.data.AuthRepository
+import id.imrob.mynetflix.data.remote.Resource
+import id.imrob.mynetflix.data.remote.request.LoginRequest
+import id.imrob.mynetflix.data.remote.request.RegisterRequest
+import id.imrob.mynetflix.data.remote.response.LoginReponse
+import id.imrob.mynetflix.data.remote.response.RegisterReponse
+import id.imrob.mynetflix.data.remote.response.WebResponse
 import id.imrob.mynetflix.domain.model.User
 import id.imrob.mynetflix.ui.MainViewModel
+import id.imrob.mynetflix.ui.screen.auth.login.LoginScreenState
+import id.imrob.mynetflix.ui.screen.auth.register.RegisterScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
-  private val authRepository: AuthRepository
-): ViewModel() {
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
-  private val _user = MutableStateFlow<User?>(null)
-  val userLogin: StateFlow<User?> get() = _user
+    private val _loginScreenState = MutableStateFlow<LoginScreenState>(LoginScreenState.Empty)
+    val userLogin: StateFlow<LoginScreenState> get() = _loginScreenState
 
-  private val _userRegister = MutableStateFlow<User?>(null)
-  val userRegister: StateFlow<User?> get() = _userRegister
+    private val _registerScreenState =
+        MutableStateFlow<RegisterScreenState>(RegisterScreenState.Empty)
+    val userRegister: StateFlow<RegisterScreenState> get() = _registerScreenState
 
-  companion object {
-    val Factory: ViewModelProvider.Factory = viewModelFactory {
-      initializer {
-        val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MovieApplication
-        AuthViewModel(application.appMovieContainer.authRepository)
-      }
-    }
-  }
-
-  fun login(email: String, password: String){
-    viewModelScope.launch {
-      authRepository.login(email, password).collect { users ->
-        if(users.isNotEmpty()){
-          _user.value = users[0]
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application =
+                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MovieApplication
+                AuthViewModel(application.appMovieContainer.authRepository)
+            }
         }
-      }
     }
-  }
 
-  fun register(email: String, password: String){
-    viewModelScope.launch {
-      authRepository.register(User( name = "", email = email, password = password)).collect{ user ->
-        _userRegister.value = user
-      }
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _loginScreenState.value = LoginScreenState.Loading
+            authRepository.login(LoginRequest(password, email)).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _loginScreenState.value = LoginScreenState.Success(result.data.data)
+                    }
+                    is Resource.Error -> {
+                        _loginScreenState.value = LoginScreenState.Error(result.msg)
+                    }
+                    else -> Unit
+                }
+            }
+        }
     }
-  }
 
-  fun storeEmail(email: String){
-    viewModelScope.launch {
-      authRepository.storeEmail(email)
+    fun register(request: RegisterRequest) {
+        viewModelScope.launch {
+            _registerScreenState.value = RegisterScreenState.Loading
+            authRepository.register(request).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _registerScreenState.value = RegisterScreenState.Success(result.data.data)
+                    }
+                    is Resource.Error -> {
+                        _registerScreenState.value = RegisterScreenState.Error(result.msg)
+                    }
+                    else -> Unit
+                }
+            }
+        }
     }
-  }
+
+    fun storeEmail(email: String) {
+        viewModelScope.launch {
+            authRepository.storeEmail(email)
+        }
+    }
+
+    fun storeToken(token: String) {
+        viewModelScope.launch {
+            authRepository.storeToken(token)
+        }
+    }
 
 }

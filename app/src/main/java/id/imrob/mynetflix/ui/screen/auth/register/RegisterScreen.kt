@@ -1,39 +1,27 @@
 package id.imrob.mynetflix.ui.screen.auth.register
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import id.imrob.mynetflix.R
+import id.imrob.mynetflix.data.remote.request.RegisterRequest
 import id.imrob.mynetflix.ui.component.*
 import id.imrob.mynetflix.ui.screen.auth.AuthViewModel
-import id.imrob.mynetflix.ui.theme.Gray
 import id.imrob.mynetflix.ui.theme.MyNetflixTheme
-import id.imrob.mynetflix.ui.theme.Placeholder
-import id.imrob.mynetflix.ui.theme.RedNetflix
 
 @ExperimentalMaterial3Api
 @Composable
@@ -42,6 +30,7 @@ fun RegisterScreen(
     viewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = AuthViewModel.Factory)
 ) {
 
+    val context = LocalContext.current
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var username by rememberSaveable { mutableStateOf("") }
@@ -51,9 +40,23 @@ fun RegisterScreen(
 
     val userRegisterResponse by viewModel.userRegister.collectAsState()
 
+    val registerRequest = RegisterRequest(
+        password, date, gender.toIntOrNull() ?: 1, email, username
+    )
+
     LaunchedEffect(userRegisterResponse) {
-        userRegisterResponse?.let { user ->
-            navHostController.popBackStack()
+        when (userRegisterResponse) {
+            is RegisterScreenState.Success -> {
+                navHostController.popBackStack()
+            }
+            is RegisterScreenState.Error -> {
+                Toast.makeText(
+                    context,
+                    (userRegisterResponse as RegisterScreenState.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            else -> Unit
         }
     }
 
@@ -63,36 +66,46 @@ fun RegisterScreen(
             .padding(horizontal = 16.dp)
             .fillMaxSize(),
         topBar = { MovieAppBar() }) { contentPadding ->
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
                 .background(Color.Black)
-                .padding(contentPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(contentPadding)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-            TextFieldEmail(email = email, onValueChange = { email = it })
-            TextFieldPassword(password = password, onValueChange = { password = it })
-            TextFieldUserName(username = username, onValueChange = { username = it })
-            TextFieldBirthDate(date = date, onValueChange = { date = it })
-            TextFieldDropDown(
-                text = gender,
-                label = "Gender",
-                itemDropDown = listOfGender ,
-                onValueChange ={ gender = it }
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                TextFieldEmail(email = email, onValueChange = { email = it })
+                TextFieldPassword(password = password, onValueChange = { password = it })
+                TextFieldUserName(username = username, onValueChange = { username = it })
+                TextFieldBirthDate(date = date, onValueChange = { date = it })
+                TextFieldDropDown(
+                    text = gender,
+                    label = "Gender",
+                    itemDropDown = listOfGender,
+                    onValueChange = { gender = it }
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            OutlineButton(text = stringResource(R.string.register).uppercase()) {
-                viewModel.register(email, password)
+                OutlineButton(text = stringResource(R.string.register).uppercase()) {
+                    viewModel.register(registerRequest)
+                }
+
+                GhostButton(text = stringResource(R.string.have_account).uppercase()) {
+                    navHostController.popBackStack()
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
             }
 
-            GhostButton(text = stringResource(R.string.have_account).uppercase()) {
-                navHostController.popBackStack()
+            if (userRegisterResponse is RegisterScreenState.Loading) {
+                CircularProgressIndicator(color = Color.White)
             }
-
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 

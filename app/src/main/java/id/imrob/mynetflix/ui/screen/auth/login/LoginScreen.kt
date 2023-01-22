@@ -1,22 +1,18 @@
 package id.imrob.mynetflix.ui.screen.auth.login
 
-import androidx.compose.foundation.BorderStroke
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -25,9 +21,8 @@ import id.imrob.mynetflix.R
 import id.imrob.mynetflix.ui.Routers
 import id.imrob.mynetflix.ui.component.*
 import id.imrob.mynetflix.ui.screen.auth.AuthViewModel
-import id.imrob.mynetflix.ui.theme.Gray
+import id.imrob.mynetflix.ui.screen.auth.register.RegisterScreenState
 import id.imrob.mynetflix.ui.theme.MyNetflixTheme
-import id.imrob.mynetflix.ui.theme.Placeholder
 
 @ExperimentalMaterial3Api
 @Composable
@@ -36,66 +31,85 @@ fun LoginScreen(
     viewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = AuthViewModel.Factory)
 ) {
 
+    val context = LocalContext.current
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     val userLoginResponse by viewModel.userLogin.collectAsState()
 
     LaunchedEffect(userLoginResponse) {
-        userLoginResponse?.let { user ->
-            viewModel.storeEmail(user.email)
-            navHostController.navigate(Routers.HOME)
+        when (userLoginResponse) {
+            is LoginScreenState.Success -> {
+                viewModel.storeToken((userLoginResponse as LoginScreenState.Success).user.token)
+                navHostController.navigate(Routers.HOME)
+            }
+            is LoginScreenState.Error -> {
+                Toast.makeText(
+                    context,
+                    (userLoginResponse as LoginScreenState.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            else -> Unit
         }
     }
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         MovieAppBar()
     }) { contentPadding ->
-        Column(
+        Box(
             modifier = Modifier
-              .fillMaxSize()
-              .padding(contentPadding)
-              .background(Color.Black),
-            verticalArrangement = Arrangement.Center
+                .background(Color.Black)
+                .padding(contentPadding)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-
-            TextFieldEmail(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                email = email,
-                onValueChange = { email = it }
-            )
-
-            TextFieldPassword(
+            Column(
                 modifier = Modifier
-                  .padding(horizontal = 16.dp)
-                  .padding(top = 16.dp),
-                password = password,
-                onValueChange = { password = it }
-            )
-
-            OutlineButton(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 16.dp)
-                  .padding(top = 32.dp),
-
-                text = stringResource(R.string.login).uppercase()
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center
             ) {
-                viewModel.login(email, password)
+
+                TextFieldEmail(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    email = email,
+                    onValueChange = { email = it }
+                )
+
+                TextFieldPassword(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    password = password,
+                    onValueChange = { password = it }
+                )
+
+                OutlineButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 32.dp),
+
+                    text = stringResource(R.string.login).uppercase()
+                ) {
+                    viewModel.login(email, password)
+                }
+
+                GhostButton(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 64.dp),
+                    text = stringResource(id = R.string.register_new_account).uppercase()
+                ) {
+                    navHostController.navigate(Routers.REGISTER)
+                }
             }
 
-            GhostButton(
-                modifier = Modifier
-                  .padding(horizontal = 16.dp)
-                  .padding(top = 64.dp),
-                text = stringResource(id = R.string.register_new_account).uppercase()
-            ) {
-                navHostController.navigate(Routers.REGISTER)
+            if (userLoginResponse is LoginScreenState.Loading) {
+                CircularProgressIndicator(color = Color.White)
             }
         }
     }
-
 }
 
 @ExperimentalMaterial3Api

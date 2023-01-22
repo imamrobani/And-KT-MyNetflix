@@ -21,7 +21,7 @@ interface AppMovieContainer {
 class DefaultAppMovieContainer(
     private val context: Context
 ): AppMovieContainer{
-    private val BASE_URL = "https://api.themoviedb.org/3/"
+    private val BASE_URL = "http://54.236.81.227/api/"
 
     // print response json
     private val interceptor: OkHttpClient get() {
@@ -51,5 +51,5 @@ class DefaultAppMovieContainer(
 
     override val localDatasource: LocalDataSource by lazy { LocalDataSource(movieDataBase.userDao(), dataStore) }
 
-    override val authRepository: AuthRepository by lazy { AuthRepository(localDatasource)  }
+    override val authRepository: AuthRepository by lazy { AuthRepository(localDatasource, remoteDataSource)  }
 }
