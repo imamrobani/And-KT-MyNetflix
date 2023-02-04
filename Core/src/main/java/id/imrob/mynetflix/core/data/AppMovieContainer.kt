@@ -12,7 +12,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
 interface AppMovieContainer {
     val remoteDataSource: RemoteDataSource
     val movieRepository: MovieRepository
@@ -24,22 +23,39 @@ interface AppMovieContainer {
 
 class DefaultAppMovieContainer(
     private val context: Context
-): AppMovieContainer {
-    private val BASE_URL = "http://54.236.81.227/api/"
+) : AppMovieContainer {
 
-    // print response json
-    private val interceptor: OkHttpClient get() {
-        val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+    private val BASE_URL = "http://54.236.81.227/api/"
+    private val BASE_URL_TMDB = "https://api.themoviedb.org/3/"
+
+    /**
+     * Use the Retrofit builder to build a retrofit object using a kotlinx.serialization converter
+     */
+    private fun provideRetrofitClient(): OkHttpClient {
+        val loggingInterceptor =
+            HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
         return OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
     }
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(BASE_URL)
-        .client(interceptor)
+        .client(provideRetrofitClient())
         .build()
 
-    private val retrofitService: MovieService by lazy { retrofit.create(MovieService::class.java) }
+    private val retrofitTmdb: Retrofit = Retrofit.Builder()
+        .addConverterFactory(GsonConverterFactory.create())
+        .baseUrl(BASE_URL_TMDB)
+        .client(provideRetrofitClient())
+        .build()
+
+    private val retrofitService: MovieService by lazy {
+        retrofit.create(MovieService::class.java)
+    }
+
+    private val retrofitTmdbService: MovieService by lazy {
+        retrofitTmdb.create(MovieService::class.java)
+    }
 
     private val movieDatabase: MovieDatabase by lazy {
         MovieDatabase.getInstance(context)
@@ -49,7 +65,7 @@ class DefaultAppMovieContainer(
         MovieDataStore(context)
     }
 
-    override val remoteDataSource: RemoteDataSource by lazy { RemoteDataSource(retrofitService) }
+    override val remoteDataSource: RemoteDataSource by lazy { RemoteDataSource(retrofitService, retrofitTmdbService) }
 
     override val movieRepository: MovieRepository by lazy { MovieRepository(remoteDataSource) }
 
@@ -60,4 +76,5 @@ class DefaultAppMovieContainer(
     override val movieUseCase: MovieUseCase by lazy { MovieUseCase(movieRepository) }
 
     override val authUseCase: AuthUseCase by lazy { AuthUseCase(authRepository) }
+
 }

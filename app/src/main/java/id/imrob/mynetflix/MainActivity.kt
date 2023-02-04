@@ -19,8 +19,9 @@ import id.imrob.mynetflix.ui.MainViewModel
 import id.imrob.mynetflix.ui.Routers
 import id.imrob.mynetflix.ui.screen.auth.login.LoginScreen
 import id.imrob.mynetflix.ui.screen.auth.register.RegisterScreen
+import id.imrob.mynetflix.ui.screen.dashboard.DashboardScreen
 import id.imrob.mynetflix.ui.screen.detail.MovieDetailScreen
-import id.imrob.mynetflix.ui.screen.home.HomeScreen
+import id.imrob.mynetflix.ui.screen.dashboard.home.HomeScreen
 import id.imrob.mynetflix.ui.theme.MyNetflixTheme
 
 @ExperimentalMaterial3Api
@@ -45,32 +46,42 @@ class MainActivity : ComponentActivity() {
 @ExperimentalMaterial3Api
 @Composable
 fun NetflixCloneApp(
-    viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = MainViewModel.Factory )
+    viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = MainViewModel.Factory)
 ) {
 
     val navController = rememberNavController()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         viewModel.getIsLoggedInUser()
     }
-    
+
     isLoggedIn?.let {
-        NavHost(navController = navController, startDestination = if(it) Routers.HOME else Routers.LOGIN){
-            composable(route = Routers.LOGIN){
+        NavHost(
+            navController = navController,
+            startDestination = if (it) Routers.DASHBOARD else Routers.LOGIN
+        ) {
+            composable(route = Routers.LOGIN) {
                 LoginScreen(navController)
             }
 
-            composable(route = Routers.REGISTER){
+            composable(route = Routers.REGISTER) {
                 RegisterScreen(navController)
             }
 
             composable(route = Routers.HOME) {
                 HomeScreen(navController)
             }
+
+            composable(
+                route = Routers.DASHBOARD
+            ) {
+                DashboardScreen(navController)
+            }
+
             composable(
                 route = "${Routers.DETAIL}/{movieId}",
-                arguments = listOf(navArgument("movieId") {type = NavType.StringType})
+                arguments = listOf(navArgument("movieId") { type = NavType.StringType })
             ) { NavBackStackEntry ->
                 val movieId = NavBackStackEntry.arguments?.getString("movieId")
                 MovieDetailScreen(movieId.orEmpty(), navController)

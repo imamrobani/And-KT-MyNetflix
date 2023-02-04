@@ -14,16 +14,23 @@ import kotlinx.coroutines.flow.flowOn
 import retrofit2.HttpException
 
 class RemoteDataSource(
-    private val movieService: MovieService
+    private val movieService: MovieService,
+    private val movieTmdbService: MovieService
 ) : SafeApiCall {
-    suspend fun getNowPlayingMovie() = flow<List<Movie>> {
-        movieService.getNowPlaying().toListMovie().let { emit(it) }
-    }.catch {
-        Log.d("RemoteDataSource", "getNowPlayingMovie: failed = ${it.message}")
-    }.flowOn(Dispatchers.IO)
+    suspend fun getNowPlayingMovie() = flow {
+        emit(safeApiCall { movieTmdbService.getNowPlayingMovie().toListMovie() })
+    }
+
+    suspend fun getPopularMovie() = flow {
+        emit(safeApiCall { movieTmdbService.getPopularMovie().toListMovie() })
+    }
+
+    suspend fun getUpcomingMovie() = flow {
+        emit(safeApiCall { movieTmdbService.getUpcomingMovie().toListMovie() })
+    }
 
     suspend fun getMovieDetail(id: String) = flow {
-        movieService.getMovieDetail(id).toMovie().let { emit(it) }
+        movieTmdbService.getMovieDetail(id).toMovie().let { emit(it) }
     }.catch {
         Log.d("MovieRepository", "getMovieDetail: failed = ${it.message}")
     }.flowOn(Dispatchers.IO)
