@@ -32,8 +32,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import id.imrob.mynetflix.data.MovieDatasource
-import id.imrob.mynetflix.domain.model.Movie
+import id.imrob.mynetflix.core.data.MovieDatasource
+import id.imrob.mynetflix.core.domain.model.Movie
 import id.imrob.mynetflix.ui.component.MovieAppBar
 
 @ExperimentalMaterial3Api

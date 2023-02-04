@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.imrob.mynetflix.MovieApplication
-import id.imrob.mynetflix.data.MovieRepository
-import id.imrob.mynetflix.domain.model.Movie
+import id.imrob.mynetflix.core.data.MovieRepository
+import id.imrob.mynetflix.core.domain.model.Movie
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

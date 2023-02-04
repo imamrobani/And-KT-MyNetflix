@@ -6,13 +6,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.imrob.mynetflix.MovieApplication
-import id.imrob.mynetflix.data.AuthRepository
+import id.imrob.mynetflix.core.domain.usecase.AuthUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel constructor(
-  private val authRepository: AuthRepository
+  private val authRepository: AuthUseCase
 ): ViewModel() {
 
   private val _isLoggedIn = MutableStateFlow<Boolean?>(null)
@@ -23,8 +23,7 @@ class MainViewModel constructor(
     val Factory: ViewModelProvider.Factory = viewModelFactory {
       initializer {
         val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MovieApplication
-        val repository = application.appMovieContainer.authRepository
-        MainViewModel(repository)
+        MainViewModel(application.appMovieContainer.authUseCase)
       }
     }
   }

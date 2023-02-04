@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import id.imrob.mynetflix.R
-import id.imrob.mynetflix.data.MovieDatasource
-import id.imrob.mynetflix.domain.model.Movie
+import id.imrob.mynetflix.core.data.MovieDatasource
+import id.imrob.mynetflix.core.domain.model.Movie
 import id.imrob.mynetflix.ui.theme.MyNetflixTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -6,16 +6,14 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import id.imrob.mynetflix.MovieApplication
-import id.imrob.mynetflix.data.MovieDatasource
-import id.imrob.mynetflix.data.MovieRepository
-import id.imrob.mynetflix.domain.model.Movie
+import id.imrob.mynetflix.core.domain.usecase.MovieUseCase
+import id.imrob.mynetflix.core.domain.model.Movie
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MovieViewModel constructor(
-    private val movieRepository: MovieRepository
+    private val movieRepository: MovieUseCase
 ) : ViewModel() {
 
     private val _movies = MutableStateFlow(emptyList<Movie>())
@@ -26,8 +24,7 @@ class MovieViewModel constructor(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as MovieApplication
-                val respository = application.appMovieContainer.movieRepository
-                MovieViewModel(respository)
+                MovieViewModel(application.appMovieContainer.movieUseCase)
             }
         }
     }

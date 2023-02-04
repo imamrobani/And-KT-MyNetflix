@@ -21,7 +21,6 @@ import id.imrob.mynetflix.R
 import id.imrob.mynetflix.ui.Routers
 import id.imrob.mynetflix.ui.component.*
 import id.imrob.mynetflix.ui.screen.auth.AuthViewModel
-import id.imrob.mynetflix.ui.screen.auth.register.RegisterScreenState
 import id.imrob.mynetflix.ui.theme.MyNetflixTheme
 
 @ExperimentalMaterial3Api

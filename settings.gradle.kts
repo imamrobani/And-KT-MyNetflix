@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MyNetflix"
 include(":app")
+include(":Core")

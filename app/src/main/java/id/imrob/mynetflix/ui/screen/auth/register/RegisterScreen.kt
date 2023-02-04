@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import id.imrob.mynetflix.R
-import id.imrob.mynetflix.data.remote.request.RegisterRequest
+import id.imrob.mynetflix.core.data.remote.request.RegisterRequest
 import id.imrob.mynetflix.ui.component.*
 import id.imrob.mynetflix.ui.screen.auth.AuthViewModel
 import id.imrob.mynetflix.ui.theme.MyNetflixTheme

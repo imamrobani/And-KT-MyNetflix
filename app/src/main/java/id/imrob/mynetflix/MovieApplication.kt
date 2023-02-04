@@ -1,8 +1,8 @@
 package id.imrob.mynetflix
 
 import android.app.Application
-import id.imrob.mynetflix.data.AppMovieContainer
-import id.imrob.mynetflix.data.DefaultAppMovieContainer
+import id.imrob.mynetflix.core.data.AppMovieContainer
+import id.imrob.mynetflix.core.data.DefaultAppMovieContainer
 
 class MovieApplication: Application() {
 

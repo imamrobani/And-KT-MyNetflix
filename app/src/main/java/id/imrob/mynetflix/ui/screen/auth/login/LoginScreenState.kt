@@ -1,6 +1,6 @@
 package id.imrob.mynetflix.ui.screen.auth.login
 
-import id.imrob.mynetflix.data.remote.response.LoginReponse
+import id.imrob.mynetflix.core.data.remote.response.LoginReponse
 
 sealed class LoginScreenState {
     class Success(val user: LoginReponse): LoginScreenState()
