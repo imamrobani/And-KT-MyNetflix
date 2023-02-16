@@ -6,6 +6,7 @@ import id.imrob.mynetflix.core.data.remote.response.*
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -44,5 +45,10 @@ interface MovieService {
     suspend fun login(
         @Body login: LoginRequest
     ): WebResponse<LoginReponse>
+
+    @PUT("v1/user")
+    suspend fun updateUser(
+        @Body register: RegisterRequest
+    ): WebResponse<UpdateResponse>
 
 }

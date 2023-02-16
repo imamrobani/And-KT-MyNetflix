@@ -1,5 +1,6 @@
 package id.imrob.mynetflix.core.data
 
+import id.imrob.mynetflix.core.data.local.LocalDataSource
 import id.imrob.mynetflix.core.data.remote.RemoteDataSource
 import id.imrob.mynetflix.core.data.remote.Resource
 import id.imrob.mynetflix.core.domain.model.Movie
@@ -7,7 +8,8 @@ import id.imrob.mynetflix.core.domain.repository.IMovieRepository
 import kotlinx.coroutines.flow.Flow
 
 class MovieRepository(
-    private val remoteDataSource: RemoteDataSource
+    private val remoteDataSource: RemoteDataSource,
+    private val localDataSource: LocalDataSource
 ) : IMovieRepository {
     override suspend fun getNowPlayingMovie(): Flow<Resource<List<Movie>>> =
         remoteDataSource.getNowPlayingMovie()
@@ -20,4 +22,16 @@ class MovieRepository(
 
     override suspend fun getMovieDetail(id: String): Flow<Movie> =
         remoteDataSource.getMovieDetail(id)
+
+    override suspend fun getAllFavoriteMovie(): Flow<List<Movie>> =
+        localDataSource.getAllFavoriteMovie()
+
+    override suspend fun isMovieFavorite(id: String): Flow<Boolean> =
+        localDataSource.isMMovieFavorite(id)
+
+    override suspend fun addMovieToFavorite(movie: Movie): Flow<Boolean> =
+        localDataSource.addFavoriteMovie(movie)
+
+    override suspend fun removeMovieFromFavorite(movie: Movie): Flow<Boolean> =
+        localDataSource.removeMovieFromFavorite(movie)
 }

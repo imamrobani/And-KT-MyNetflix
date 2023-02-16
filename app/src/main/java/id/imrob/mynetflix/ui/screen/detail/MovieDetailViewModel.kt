@@ -8,30 +8,60 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import id.imrob.mynetflix.MovieApplication
 import id.imrob.mynetflix.core.data.MovieRepository
 import id.imrob.mynetflix.core.domain.model.Movie
+import id.imrob.mynetflix.core.domain.usecase.MovieUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MovieDetailViewModel constructor(
-    private val movieRepository: MovieRepository
-): ViewModel() {
+    private val movieUseCase: MovieUseCase
+) : ViewModel() {
 
     private val _movie = MutableStateFlow<Movie?>(null)
     val movie: StateFlow<Movie?> get() = _movie
 
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite get() = _isFavorite
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MovieApplication)
-                MovieDetailViewModel(application.appMovieContainer.movieRepository)
+                val application =
+                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MovieApplication)
+                MovieDetailViewModel(application.appMovieContainer.movieUseCase)
             }
         }
     }
 
-    fun getMovieDetail(id: String){
+    fun getMovieDetail(id: String) {
         viewModelScope.launch {
-            movieRepository.getMovieDetail(id).collect{
+            movieUseCase.getMovieDetail(id).collect {
                 _movie.value = it
+            }
+        }
+    }
+
+    fun isMovieFavorite(id: String) {
+        viewModelScope.launch {
+            movieUseCase.isMovieFavorite(id).collect {
+                _isFavorite.value = it
+            }
+        }
+    }
+
+    fun addToFavorite(movie: Movie) {
+        viewModelScope.launch {
+            movieUseCase.addMovieToFavorite(movie).collect {
+                //isMovieFavorite(movie.id)
+            }
+        }
+    }
+
+    fun removeFromFavorite(movie: Movie) {
+        viewModelScope.launch {
+            movieUseCase.removeMoveFromFavorite(movie).collect {
+                //isMovieFavorite(movie.id)
             }
         }
     }

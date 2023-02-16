@@ -22,15 +22,15 @@ class MovieDataStore constructor(
 
     suspend fun clear() {
         context.dataStore.edit { preference ->
-            preference.remove(EMAIL)
+            preference.remove(USERNAME)
             preference.remove(TOKEN)
 
         }
     }
 
-    val email: Flow<String>
+    val username: Flow<String>
         get() = context.dataStore.data.map { preference ->
-            preference[EMAIL] ?: ""
+            preference[USERNAME] ?: ""
         }
 
     val token: Flow<String>
@@ -39,7 +39,7 @@ class MovieDataStore constructor(
         }
 
     companion object {
-        val EMAIL = stringPreferencesKey("EMAIL")
+        val USERNAME = stringPreferencesKey("USERNAME")
         val TOKEN = stringPreferencesKey("TOKEN")
     }
 }
