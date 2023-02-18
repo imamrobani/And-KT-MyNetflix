@@ -30,6 +30,12 @@ interface MovieService {
         @Query("language") language: String = "en-US"
     ): ListMovieResponse
 
+    @GET("movie/{movieId}/videos")
+    suspend fun getVideosFromMovie(
+        @Path("movieId") movieId: String,
+        @Query("api_key") apiKey: String = "0a597bad68c0b95d5fab612cff9d8891"
+    ): VideosResponse
+
     @GET("movie/{movieId}")
     suspend fun getMovieDetail(
         @Path("movieId") movieId: String,

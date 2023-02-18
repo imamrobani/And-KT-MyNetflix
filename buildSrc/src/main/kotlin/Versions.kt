@@ -33,4 +33,7 @@ object Versions {
 
     // system ui controller
     const val systemUiController = "0.28.0"
+
+    // android youtube player
+    const val androidYoutubePlayer = "11.1.0"
 }

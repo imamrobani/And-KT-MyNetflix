@@ -9,6 +9,7 @@ class AuthUseCase(
     private val authRepository: AuthRepository
 ): IAuthInteractor {
     override suspend fun login(loginRequest: LoginRequest) = authRepository.login(loginRequest)
+    override suspend fun logout() = authRepository.logout()
 
     override suspend fun register(registerRequest: RegisterRequest) = authRepository.register(registerRequest)
 

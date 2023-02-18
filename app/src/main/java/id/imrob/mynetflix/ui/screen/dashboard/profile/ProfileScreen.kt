@@ -115,7 +115,7 @@ fun ProfileScreen(
                 text = "LOGOUT",
                 style = MaterialTheme.typography.titleMedium.copy(color = RedNetflix)
             ) {
-                /* onClick  */
+                viewModel.logout()
             }
 
         }

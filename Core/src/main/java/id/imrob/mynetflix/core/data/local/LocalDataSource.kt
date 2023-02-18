@@ -25,6 +25,8 @@ class LocalDataSource constructor(
         Log.e("LocalDataSource", "isLoggedIn: failed=${it.message}")
     }.flowOn(Dispatchers.IO)
 
+    suspend fun logout() = movieDataStore.clear()
+
     suspend fun getCurrentUsername() = flow {
         movieDataStore.username.collect{ emit(it)}
     }.catch {

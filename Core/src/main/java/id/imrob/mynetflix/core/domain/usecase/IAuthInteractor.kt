@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface IAuthInteractor {
     suspend fun login(loginRequest: LoginRequest): Flow<Resource<WebResponse<LoginReponse>>>
+    suspend fun logout()
     suspend fun register(registerRequest: RegisterRequest): Flow<Resource<WebResponse<RegisterResponse>>>
     suspend fun getIsLoggedIn(): Flow<Boolean>
     suspend fun getCurrentUserName(): Flow<String>

@@ -6,6 +6,7 @@ import id.imrob.mynetflix.core.data.remote.request.LoginRequest
 import id.imrob.mynetflix.core.data.remote.request.RegisterRequest
 import id.imrob.mynetflix.core.data.remote.response.toListMovie
 import id.imrob.mynetflix.core.data.remote.response.toMovie
+import id.imrob.mynetflix.core.data.remote.response.toVideos
 import id.imrob.mynetflix.core.domain.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -34,6 +35,10 @@ class RemoteDataSource(
     }.catch {
         Log.d("MovieRepository", "getMovieDetail: failed = ${it.message}")
     }.flowOn(Dispatchers.IO)
+
+    suspend fun getVideosFromMovie(id: String) = flow {
+        emit(safeApiCall { movieTmdbService.getVideosFromMovie(id).toVideos() })
+    }
 
     suspend fun register(registerRequest: RegisterRequest) = flow {
         emit(safeApiCall { movieService.register(registerRequest) })

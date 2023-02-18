@@ -107,4 +107,10 @@ class MovieViewModel constructor(
         }
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            authUseCase.logout()
+        }
+    }
+
 }

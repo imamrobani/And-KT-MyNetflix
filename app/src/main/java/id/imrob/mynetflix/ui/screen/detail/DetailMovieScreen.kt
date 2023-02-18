@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,27 +32,33 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import id.imrob.mynetflix.core.data.MovieDatasource
 import id.imrob.mynetflix.core.domain.model.Movie
+import id.imrob.mynetflix.ui.component.ErrorUi
+import id.imrob.mynetflix.ui.component.LoadingUi
 import id.imrob.mynetflix.ui.component.MovieAppBar
-import kotlinx.coroutines.flow.MutableStateFlow
+import id.imrob.mynetflix.ui.component.VideoPlayer
 
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(
     movieId: String,
     navHostController: NavHostController,
-    viewModel: MovieDetailViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = MovieDetailViewModel.Factory)
+    viewModel: MovieDetailViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = MovieDetailViewModel.Factory),
 ) {
 
-    val movie by viewModel.movie.collectAsState()
+    val state by viewModel.movieDetailScreenState.collectAsState()
     val isMovieFavorite by viewModel.isFavorite.collectAsState()
     var isUpdateFavorite by remember { mutableStateOf(false) }
     var isMoviePlaying by remember { mutableStateOf(false) }
 
-    LaunchedEffect(movieId) {
+    // initialize
+    LaunchedEffect(Unit) {
+        viewModel.combineData()
         viewModel.getMovieDetail(movieId)
+        viewModel.getVideosFromMovie(movieId)
         viewModel.isMovieFavorite(movieId)
     }
 
+    // update in favorite
     LaunchedEffect(isUpdateFavorite) {
         viewModel.isMovieFavorite(movieId)
         isUpdateFavorite = false
@@ -63,151 +66,193 @@ fun MovieDetailScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-    ) {
-        ConstraintLayout(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .background(Color.Black)
-        ) {
-            val (backdropRef, topBarRef, ratingRef, buttonRef, overviewRef, bgBackdropRef) = createRefs()
-            movie?.let { movie ->
-                AsyncImage(
+        containerColor = Color.Black
+    ) { contentPadding ->
+        when(state) {
+            is MovieDetailScreenState.Success -> {
+                val movie = (state as MovieDetailScreenState.Success).movieDetail
+                val video = (state as MovieDetailScreenState.Success).videos.results[0]
+
+                ConstraintLayout(
                     modifier = Modifier
                         .fillMaxSize()
-                        .constrainAs(backdropRef) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            width = Dimension.ratio("2:3")
-                            height = Dimension.fillToConstraints
-                        }
-                        .drawWithCache {
-                            createVerticalGradient(0, 5f)
-                        },
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(movie.backdropResourceId)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop
-                )
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(86.dp)
-                    .drawWithCache { createVerticalGradient(1, 2f) }
-                )
-                if(isMoviePlaying){
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(bgBackdropRef) {
-                            start.linkTo(parent.start)
-                            top.linkTo(parent.top)
-                            end.linkTo(parent.end)
-                            width = Dimension.ratio("2:3")
-                            height = Dimension.fillToConstraints
-                        }
+                        .padding(contentPadding)
                         .background(Color.Black)
+                ) {
+                    val (backdropRef, topBarRef, ratingRef, buttonRef, overviewRef, bgBackdropRef, videoPlayerRef, boxToolbarRef) = createRefs()
+                    AsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .constrainAs(backdropRef) {
+                                top.linkTo(parent.top)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                width = Dimension.ratio("2:3")
+                                height = Dimension.fillToConstraints
+                            }
+                            .drawWithCache { createVerticalGradient(0, 5f) },
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(movie.backdropResourceId)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop
                     )
-                }
-
-                Row(
-                    modifier = Modifier.constrainAs(ratingRef) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(86.dp)
+                            .drawWithCache { createVerticalGradient(1, 2f) }
+                            .constrainAs(boxToolbarRef) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                top.linkTo(parent.top)
+                            }
+                    )
+                    if(isMoviePlaying) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(bgBackdropRef) {
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                    top.linkTo(parent.top)
+                                    width = Dimension.ratio("2:3")
+                                    height = Dimension.fillToConstraints
+                                }
+                                .background(Color.Black)
+                        )
+                        VideoPlayer(
+                            videoId = video.key,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(videoPlayerRef) {
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                    top.linkTo(boxToolbarRef.bottom)
+                                }
+                        )
+                    }
+                    Row(modifier = Modifier.constrainAs(ratingRef) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
                         end.linkTo(parent.end)
                         start.linkTo(parent.start)
-                    },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Star,
-                        contentDescription = "",
-                        tint = Color.White
-                    )
-                    Text(
-                        text = "${movie.rating}",
-                        style = TextStyle(
-                            color = Color.White
-                        )
-                    )
-                }
-                Row(
-                    modifier = Modifier.constrainAs(buttonRef) {
-                        top.linkTo(ratingRef.bottom, 16.dp)
-                        end.linkTo(parent.end)
-                        start.linkTo(parent.start)
-                    },
-                ) {
-                    Button(
-                        onClick = { },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                    ) {
+                    }, verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Rounded.PlayArrow,
+                            imageVector = Icons.Rounded.Star,
                             contentDescription = "",
-                            tint = Color.Black
+                            tint = Color.White
                         )
-                        Text(text = "Play", style = TextStyle(color = Color.Black))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "${movie.rating}", style = TextStyle(color = Color.White))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                            .clickable {
-                                if (isMovieFavorite) viewModel.removeFromFavorite(movie)
-                                else viewModel.addToFavorite(movie)
-                                isUpdateFavorite = true
+                    Row(
+                        modifier = Modifier.constrainAs(buttonRef) {
+                            top.linkTo(ratingRef.bottom, 16.dp)
+                            end.linkTo(parent.end)
+                            start.linkTo(parent.start)
+                        },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = {
+                                isMoviePlaying = !isMoviePlaying
                             },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isMovieFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                            contentDescription = "",
-                            tint = Color.Black
-                        )
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                        ) {
+
+                            val icon = if(isMoviePlaying) Icons.Rounded.Stop else Icons.Rounded.PlayArrow
+                            val text = if(isMoviePlaying) "Stop" else "Play"
+
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = "",
+                                tint = Color.Black
+                            )
+                            Text(text = text, style = TextStyle(color = Color.Black))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .clickable {
+                                    if (isMovieFavorite) viewModel.removeFromFavorite(movie)
+                                    else viewModel.addToFavorite(movie)
+                                    isUpdateFavorite = true
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isMovieFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                                contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
                     }
 
-                }
+                    ContentOverView(
+                        modifier = Modifier.constrainAs(overviewRef) {
+                            top.linkTo(buttonRef.bottom, 24.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        },
+                        movie = movie
+                    )
 
-                ContentOverview(
-                    modifier = Modifier.constrainAs(overviewRef) {
-                        top.linkTo(buttonRef.bottom, 24.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                    movie = movie
+                    MovieAppBar(
+                        modifier = Modifier.constrainAs(topBarRef) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        },
+                        isTransparent = true, onBack = { navHostController.popBackStack() }
+                    )
+                }
+            }
+            is MovieDetailScreenState.Loading -> {
+                LoadingUi(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding)
                 )
             }
-            MovieAppBar(
-                modifier = Modifier.constrainAs(topBarRef) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
-                isTransparent = true, onBack = { navHostController.popBackStack() }
-            )
+            is MovieDetailScreenState.Error -> {
+                val error = (state as MovieDetailScreenState.Error)
+                ErrorUi(message = error.message, onButtonClick = {
+                    when (error.whatError) {
+                        MovieDetailScreenRequestEnum.VIDEOS -> {
+                            viewModel.getVideosFromMovie(movieId)
+                        }
+
+                        MovieDetailScreenRequestEnum.DETAIL -> {
+                            viewModel.getMovieDetail(movieId)
+                        }
+                    }
+                })
+            }
+            else -> Unit
         }
     }
 }
 
 @Composable
-private fun ContentOverview(modifier: Modifier = Modifier, movie: Movie) {
+private fun ContentOverView(modifier: Modifier = Modifier, movie: Movie) {
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         val (overviewRef, imageRef, titleRef, descRef) = createRefs()
-
         Text(
             modifier = Modifier.constrainAs(overviewRef) {
                 top.linkTo(parent.top)
                 start.linkTo(parent.start)
             },
-            text = "Overview", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
+            text = "Overview",
+            style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
         )
         AsyncImage(
             modifier = Modifier
@@ -218,7 +263,6 @@ private fun ContentOverview(modifier: Modifier = Modifier, movie: Movie) {
                     width = Dimension.ratio("2:3")
                     height = Dimension.value(150.dp)
                 },
-//            painter = painterResource(id = movie.posterResourceId),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(movie.posterResourceId)
                 .crossfade(true)
@@ -250,29 +294,30 @@ private fun ContentOverview(modifier: Modifier = Modifier, movie: Movie) {
             text = movie.description,
             style = TextStyle(color = Color.White)
         )
-
     }
 }
 
+/**
+ * @param direction 0 -> down to up , 1 -> up to down
+ * @param slicing 1f -> 11, nf = 1:n
+ */
 private fun CacheDrawScope.createVerticalGradient(
-    direction: Int, // 0 -> down to up, 1 -> up to down
-    slicing: Float, // 1f -> 1:1, nf -> 1:n
+    direction: Int,
+    slicing: Float,
 ): DrawResult {
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(Color.Transparent, Color.Black),
         startY = size.height / if (direction == 0) slicing else 1f,
         endY = size.height / if (direction == 1) slicing else 1f
     )
-
     return onDrawWithContent {
         drawContent()
         drawRect(gradientBrush, blendMode = BlendMode.Multiply)
     }
 }
 
-
 @Preview
 @Composable
-private fun ContentOverviewPreview() {
-    ContentOverview(movie = MovieDatasource.getNowPlayingMovie()[9])
+private fun PreviewContentOverView() {
+    ContentOverView(movie = MovieDatasource.getNowPlayingMovie()[1])
 }
